@@ -21,10 +21,27 @@ def writebunchobj(path,bunchobj):
     pickle.dump(bunchobj,file_obj)
     file_obj.close()
 
+def readfile(path):
+    fp = open(path,'rb')
+    content = fp.read()
+    fp.close()
+    return content
+
 path = "bat/train_set.bat"
 bunch = readbunchobj(path)
 
 tfidfspace = Bunch(target_name=bunch.target_name,label=bunch.label,filenames=bunch.filenames,tdm=[],vocabulary=[])
 print bunch.contents
 
-vectorizer = TfidfVectorizer(stop_words=stpwrdlist,sublinear_tf=True,max_df=0.5)
+stopword_path = "stopword/stop_words.txt"
+
+stpwrdlist = readfile(stopword_path).splitlines()
+print stpwrdlist
+
+vectorizer = TfidfVectorizer(stop_words=stpwrdlist,sublinear_tf=True)
+transformer = TfidfTransformer()
+tfidfspace.tdm = vectorizer.fit_transform(bunch.contents)
+tfidfspace.vocabulary = vectorizer.vocabulary_
+
+space_bath = "bag/tfspace.bat"
+writebunchobj(space_bath,tfidfspace)
